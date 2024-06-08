@@ -22,19 +22,33 @@
      "${workername}.${username}.workers.dev/": "https://registry-1.docker.io",
    };
    ```
-2. use custom domain: support proxy multiple registries route by host
-   - host your domain DNS on cloudflare
-   - add `A` record of xxx.example.com to `192.0.2.1`
-   - deploy this project to cloudflare workers
-   - add `xxx.example.com/*` to HTTP routes of workers
-   - add more records and modify the config as you need
-   ```javascript
-   const routes = {
-     "docker.libcuda.so": "https://registry-1.docker.io",
-     "quay.libcuda.so": "https://quay.io",
-     "gcr.libcuda.so": "https://k8s.gcr.io",
-     "k8s-gcr.libcuda.so": "https://k8s.gcr.io",
-     "ghcr.libcuda.so": "https://ghcr.io",
-   };
-   ```
+2. use custom domain: support proxy multiple registries route by host. Have to host your domain DNS on cloudflare.
 
+  ```bash
+  # replace libcuda.so to your domain in both src/index.js and wrangler.toml
+  sed -i 's/libcuda.so/${your_domain}/g' src/index.js
+  sed -i 's/libcuda.so/${your_domain}/g' wrangler.toml
+  # install install dependencies
+  yarn
+  # deploy
+  npx wrangler deploy --env production --minify src/index.js
+  ```
+
+## Usage
+
+```bash
+# busybox:stable ==> docker.libcuda.so/busybox:stable
+docker pull docker.libcuda.so/busybox:stable
+# or
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-EOF
+{
+    "registry-mirrors": [
+        "https://docker.libcuda.so",
+    ]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+docker pull busybox:stable
+```

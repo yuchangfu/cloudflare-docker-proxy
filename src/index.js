@@ -114,7 +114,7 @@ async function handleRequest(request) {
       return Response.redirect(redirectUrl, 301);
     }
   }
-  // foward requests
+  // forward requests
   const newUrl = new URL(upstream + url.pathname);
   const newReq = new Request(newUrl, {
     method: request.method,

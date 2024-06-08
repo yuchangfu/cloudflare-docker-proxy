@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - '**.md'
+      - "**.md"
   repository_dispatch:
 
 jobs:
@@ -14,10 +14,14 @@ jobs:
     name: Build & Deploy
     steps:
       - uses: actions/checkout@v4
+      - name: Setup hostname
+        run: |
+          sed -i 's/libcuda.so/${{ secrets.CF_HOST }}/g' src/index.js
+          sed -i 's/libcuda.so/${{ secrets.CF_HOST }}/g' wrangler.toml
       - name: Publish
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{secrets.CF_ACCOUNT_ID}}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: deploy --env production --minify src/index.js
           environment: production
